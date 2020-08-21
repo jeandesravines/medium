@@ -1,0 +1,23 @@
+enum PostType {
+  ARTICLE
+  STORY
+  TUTORIAL
+}
+
+type User {
+  id: ID!
+  username: String!
+  email: String!
+  name: String!
+  description: String
+  job: String
+}
+
+type Post {
+  id: ID!
+  author: User!
+  title: String!
+  body: String!
+  type: PostType!
+  publishedAt: DateTime
+}
