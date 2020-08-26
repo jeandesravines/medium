@@ -18,11 +18,4 @@ export default abstract class Seeder {
    * Create Entities
    */
   abstract async run(): Promise<void>
-
-  /**
-   * Returns true if the seed can be run
-   */
-  async shouldRun(): Promise<boolean> {
-    return true
-  }
 }
