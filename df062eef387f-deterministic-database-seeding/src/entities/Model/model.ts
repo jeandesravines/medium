@@ -19,6 +19,20 @@ export default class Model {
    * The Firestore Collection name
    */
   protected static collectionName: string
+  
+  private static get converter() {
+    return {
+      fromFirestore(snapshot: FirebaseFirestore.QueryDocumentSnapshot): Model {
+        return new this(snapshot.data())
+      },
+      toFirestore(model: Model): FirebaseFirestore.DocumentData {
+        const { id, ...data } = model
+        const defaults = { createdAt: Date.now(), updatedAt: Date.now() }
+        
+        return { ...defaults, ...data } 
+      }
+    }
+  }
 
   /**
    * Return the Firestore Collection for the Model
@@ -57,9 +71,15 @@ export default class Model {
    * Delete all Documents targeted by the Query
    */
   static async deleteManyBy(where?: QueryObject): Promise<void> {
-    await this.mapBy(where as QueryObject, (doc) => {
-      return doc.ref.delete()
-    })
+    const deferred = this.query(where)
+      .get()
+      .then((querySnapshot) => {
+        return querySnapshot.docs.map(doc => {
+          doc.ref.delete()
+        })
+      })
+    
+    await Promise.all(deferred)
   }
 
   /**
