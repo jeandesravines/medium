@@ -8,30 +8,16 @@ if (configuration.app.isProduction) {
 }
 
 /**
- * Seed the Database
- */
-async function main(): Promise<void> {
-  await seed()
-}
-
-/**
  * Seed the Database by walking through each seeders and execute their `clean` and `run` methods
- * if their `shouldRun` method returns true
  */
 async function seed(): Promise<void> {
   const reducer = async (deferred: Promise<void>, seeder: Seeder) => {
     await deferred
 
-    const name = seeder.constructor.name
-    const shouldRun = await seeder.shouldRun()
+    console.info(`Start seeding for ${seeder.constructor.name} …`)
 
-    console.info(`Start seeding for ${name} …`)
-    console.info(`Should run: ${shouldRun}`)
-
-    if (shouldRun) {
-      await seeder.clean()
-      await seeder.run()
-    }
+    await seeder.clean()
+    await seeder.run()
 
     console.info(`… done`)
   }
@@ -42,4 +28,4 @@ async function seed(): Promise<void> {
 /////
 /////
 
-main()
+seed()
