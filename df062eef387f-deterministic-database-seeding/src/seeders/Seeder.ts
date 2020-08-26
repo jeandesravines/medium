@@ -3,7 +3,7 @@ import * as configuration from '../configuration'
 
 export default abstract class Seeder {
   /**
-   * The faker singleton
+   * The Chance singleton
    */
   static readonly generator: Chance.Chance = new Chance(
     configuration.chance.key
