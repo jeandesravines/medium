@@ -1,6 +1,6 @@
-import _ from 'lodash'
-import firebase from '../../services/firebase'
-import { QueryObject, QueryObjectValue } from './types'
+import _ from "lodash"
+import firebase from "../../services/firebase"
+import { QueryObject, QueryObjectValue } from "./types"
 
 export default class Model {
   /**
@@ -19,7 +19,10 @@ export default class Model {
    * The Firestore Collection name
    */
   protected static collectionName: string
-  
+
+  /**
+   * Create a Firestore Collection converter
+   */
   private static get converter() {
     return {
       fromFirestore(snapshot: FirebaseFirestore.QueryDocumentSnapshot): Model {
@@ -28,9 +31,9 @@ export default class Model {
       toFirestore(model: Model): FirebaseFirestore.DocumentData {
         const { id, ...data } = model
         const defaults = { createdAt: Date.now(), updatedAt: Date.now() }
-        
-        return { ...defaults, ...data } 
-      }
+
+        return { ...defaults, ...data }
+      },
     }
   }
 
@@ -38,7 +41,7 @@ export default class Model {
    * Return the Firestore Collection for the Model
    */
   protected static get collection() {
-    return firebase.firestore().collection(this.collectionName)
+    return firebase.firestore().collection(this.collectionName).withConverter(this.converter)
   }
 
   /**
@@ -46,8 +49,8 @@ export default class Model {
    */
   static query(where?: QueryObject) {
     const reducer = (acc: FirebaseFirestore.Query, value: QueryObjectValue, path: string) => {
-      const isObject = typeof value === 'object'
-      const entries = isObject ? Object.entries(value) : ['==', value]
+      const isObject = typeof value === "object"
+      const entries = isObject ? Object.entries(value) : ["==", value]
 
       return acc.where(path, entries[0], entries[1])
     }
@@ -71,15 +74,9 @@ export default class Model {
    * Delete all Documents targeted by the Query
    */
   static async deleteManyBy(where?: QueryObject): Promise<void> {
-    const deferred = this.query(where)
-      .get()
-      .then((querySnapshot) => {
-        return querySnapshot.docs.map(doc => {
-          doc.ref.delete()
-        })
-      })
-    
-    await Promise.all(deferred)
+    await this.mapBy(where as QueryObject, (doc) => {
+      return doc.ref.delete()
+    })
   }
 
   /**
@@ -87,7 +84,7 @@ export default class Model {
    */
   static async findManyBy(where?: QueryObject): Promise<Model[]> {
     return this.mapBy(where as QueryObject, (doc) => {
-      return new this(doc.data())
+      return doc.data()
     })
   }
 
@@ -97,11 +94,11 @@ export default class Model {
   static async save(entity: Model): Promise<Model> {
     const collection = this.collection
     const doc = collection.doc(entity.id ?? collection.doc().id)
-    const newEntity = { ...entity, id: doc.id }
+    const newEntity = new this({ ...entity, id: doc.id })
 
     await doc.set(newEntity)
 
-    return new this(newEntity)
+    return newEntity
   }
 
   /**
