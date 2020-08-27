@@ -11,7 +11,7 @@ export default class Model {
   /**
    * Base constructor
    */
-  constructor(data: Model) {
+  protected constructor(data: Model) {
     this.id = data.id
   }
 
@@ -25,10 +25,10 @@ export default class Model {
    */
   private static get converter() {
     return {
-      fromFirestore(snapshot: FirebaseFirestore.QueryDocumentSnapshot): Model {
-        return new this(snapshot.data())
+      fromFirestore<T extends Model>(snapshot: FirebaseFirestore.QueryDocumentSnapshot): T {
+        return this.create(snapshot.data())
       },
-      toFirestore(model: Model): FirebaseFirestore.DocumentData {
+      toFirestore<T extends Model>(model: T): FirebaseFirestore.DocumentData {
         const { id, ...data } = model
         const defaults = { createdAt: Date.now(), updatedAt: Date.now() }
 
@@ -42,6 +42,13 @@ export default class Model {
    */
   protected static get collection() {
     return firebase.firestore().collection(this.collectionName).withConverter(this.converter)
+  }
+  
+  /**
+   * Create a new Model instance with the data as parameter
+   */
+  static create<T extends Model>(this: new() => T, data: T): T {
+    return new this(data)
   }
 
   /**
@@ -82,7 +89,7 @@ export default class Model {
   /**
    * Get all Entities targeted by the Query
    */
-  static async findManyBy(where?: QueryObject): Promise<Model[]> {
+  static async findManyBy<T extends Model>(where?: QueryObject): Promise<T[]> {
     return this.mapBy(where as QueryObject, (doc) => {
       return doc.data()
     })
@@ -91,10 +98,10 @@ export default class Model {
   /**
    * Save or Update an Entity
    */
-  static async save(entity: Model): Promise<Model> {
+  static async save<T extends Model>(entity: T): Promise<T> {
     const collection = this.collection
     const doc = collection.doc(entity.id ?? collection.doc().id)
-    const newEntity = new this({ ...entity, id: doc.id })
+    const newEntity = this.create({ ...entity, id: doc.id })
 
     await doc.set(newEntity)
 
@@ -104,7 +111,7 @@ export default class Model {
   /**
    * Save or Update Entities
    */
-  static async saveMany(entities: Model[]): Promise<Model[]> {
+  static async saveMany<T extends Model>(entities: T[]): Promise<T[]> {
     return Promise.all(
       entities.map((entity) => {
         return this.save(entity)
