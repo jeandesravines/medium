@@ -11,7 +11,7 @@ export default class Model {
   /**
    * Base constructor
    */
-  protected constructor(data: Model) {
+  constructor(data: Model) {
     this.id = data.id
   }
 
@@ -25,10 +25,11 @@ export default class Model {
    */
   private static get converter() {
     return {
-      fromFirestore<T extends Model>(snapshot: FirebaseFirestore.QueryDocumentSnapshot): T {
-        return this.create(snapshot.data())
+      fromFirestore: <T extends Model>(snapshot: FirebaseFirestore.QueryDocumentSnapshot): T => {
+        return this.create<T>(snapshot.data() as T)
       },
-      toFirestore<T extends Model>(model: T): FirebaseFirestore.DocumentData {
+
+      toFirestore: <T extends Model>(model: T): FirebaseFirestore.DocumentData => {
         const { id, ...data } = model
         const defaults = { createdAt: Date.now(), updatedAt: Date.now() }
 
@@ -47,8 +48,8 @@ export default class Model {
   /**
    * Create a new Model instance with the data as parameter
    */
-  static create<T extends Model>(this: new() => T, data: T): T {
-    return new this(data)
+  static create<T extends Model>(data: T): T {
+    return Reflect.construct(this.constructor, [data])
   }
 
   /**
@@ -101,7 +102,7 @@ export default class Model {
   static async save<T extends Model>(entity: T): Promise<T> {
     const collection = this.collection
     const doc = collection.doc(entity.id ?? collection.doc().id)
-    const newEntity = this.create({ ...entity, id: doc.id })
+    const newEntity = this.create<T>({ ...entity, id: doc.id })
 
     await doc.set(newEntity)
 
