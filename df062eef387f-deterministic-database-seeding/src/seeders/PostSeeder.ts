@@ -16,19 +16,22 @@ export default class PostSeeder extends Seeder {
    * Create 4 Posts per Users. 1 of each type.
    */
   async run(): Promise<void> {
-    const users: User[] = await User.findManyBy() as User[]
+    const users: User[] = await User.findManyBy()
     const types: String[] = Object.values(PostType)
 
     const documents = users.flatMap((user: User) => {
       return types.map((type, i) => {
-        return {
-          type,
-          author: user.id,
+        // Only 1 in 2 article will have a publication date
+        const publishedDate = i % 2 ? Seeder.generator.date({ year: 2000 }) : null
+        const publishedAt = (publishedDate as Date)?.getTime()
+
+        return new Post({
+          publishedAt,
+          type: type as PostType,
+          author: user.id as string,
           title: Seeder.generator.sentence(),
           body: Seeder.generator.paragraph(),
-          // Only 1 in 2 article will have a publication date
-          publishedAt: i % 2 ? Seeder.generator.date({ year: 2000 }) : null,
-        }
+        })
       })
     })
 

@@ -1,6 +1,6 @@
-import _ from "lodash"
-import firebase from "../../services/firebase"
-import { QueryObject, QueryObjectValue } from "./types"
+import _ from 'lodash'
+import firebase from '../../services/firebase'
+import { QueryObject, QueryObjectValue } from './types'
 
 export default class Model {
   /**
@@ -30,10 +30,12 @@ export default class Model {
       },
 
       toFirestore: <T extends Model>(model: T): FirebaseFirestore.DocumentData => {
-        const { id, ...data } = model
-        const defaults = { createdAt: Date.now(), updatedAt: Date.now() }
+        const defaults = {
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+        }
 
-        return { ...defaults, ...data }
+        return { ...defaults, ...model }
       },
     }
   }
@@ -44,12 +46,12 @@ export default class Model {
   protected static get collection() {
     return firebase.firestore().collection(this.collectionName).withConverter(this.converter)
   }
-  
+
   /**
    * Create a new Model instance with the data as parameter
    */
   static create<T extends Model>(data: T): T {
-    return Reflect.construct(this.constructor, [data])
+    return new this(data) as T
   }
 
   /**
@@ -57,8 +59,8 @@ export default class Model {
    */
   static query(where?: QueryObject) {
     const reducer = (acc: FirebaseFirestore.Query, value: QueryObjectValue, path: string) => {
-      const isObject = typeof value === "object"
-      const entries = isObject ? Object.entries(value) : ["==", value]
+      const isObject = typeof value === 'object'
+      const entries = isObject ? Object.entries(value) : ['==', value]
 
       return acc.where(path, entries[0], entries[1])
     }

@@ -8,6 +8,7 @@ export default class User extends Model {
 
   username: string
   email: string
+  password: string
   name: string
   description?: string
   job?: string
@@ -17,6 +18,7 @@ export default class User extends Model {
 
     this.username = data.username
     this.email = data.email
+    this.password = data.password
     this.name = data.name
     this.description = data.description
     this.job = data.job

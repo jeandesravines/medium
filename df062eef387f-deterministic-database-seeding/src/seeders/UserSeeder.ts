@@ -19,14 +19,14 @@ export default class UserSeeder extends Seeder {
       // It will allow us to log into the app knowing all the usernames and passwords
       const username = `${i + 1}`.padStart(6, '0')
 
-      return {
+      return new User({
         username,
         email: `${username}@myapp.com`,
         password: 'H3!!0Wor1D', // 😅(Never do that!)
         name: Seeder.generator.name(),
         description: Seeder.generator.sentence(),
         job: Seeder.generator.profession(),
-      }
+      })
     })
 
     await User.saveMany(documents as Model[])

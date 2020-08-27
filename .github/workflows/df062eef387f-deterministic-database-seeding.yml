@@ -9,7 +9,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
-      - working-directory: $WORKING_DIRECTORY
+      - working-directory: ${{env.WORKING_DIRECTORY}}
         run: |
           yarn install
           yarn lint
@@ -19,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
-      - working-directory: $WORKING_DIRECTORY
+      - working-directory: ${{env.WORKING_DIRECTORY}}
         run: |
           yarn install
           yarn build
