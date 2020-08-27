@@ -1,0 +1,25 @@
+name: CI
+on: [push]
+env:
+  WORKING_DIRECTORY: df062eef387f-deterministic-database-seeding
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+      - working-directory: ${{env.WORKING_DIRECTORY}}
+        run: |
+          yarn install
+          yarn lint
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+      - working-directory: ${{env.WORKING_DIRECTORY}}
+        run: |
+          yarn install
+          yarn build
