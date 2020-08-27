@@ -9,6 +9,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
+      - run: cd 202008-deterministic-database-seeding
       - run: yarn lint
 
   build:
@@ -16,4 +17,5 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
+      - run: cd 202008-deterministic-database-seeding
       - run: yarn build
