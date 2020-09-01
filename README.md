@@ -1,3 +1,3 @@
 # Medium Posts
 
-Code source used by [my Medium profile](https://medium.com/@jeandesravines).
+Source code used by [my Medium posts](https://medium.com/@jeandesravines).
