@@ -5,9 +5,7 @@ export default abstract class Seeder {
   /**
    * The Chance singleton
    */
-  static readonly generator: Chance.Chance = new Chance(
-    configuration.chance.key
-  )
+  static readonly generator: Chance.Chance = new Chance(configuration.chance.key)
 
   /**
    * Clean the Collection

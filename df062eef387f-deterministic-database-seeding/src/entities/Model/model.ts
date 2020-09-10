@@ -43,7 +43,7 @@ export default class Model {
   /**
    * Return the Firestore Collection for the Model
    */
-  protected static get collection() {
+  protected static get collection(): FirebaseFirestore.CollectionReference {
     return firebase.firestore().collection(this.collectionName).withConverter(this.converter)
   }
 
@@ -57,7 +57,7 @@ export default class Model {
   /**
    * Create a Firestore Query
    */
-  static query(where?: QueryObject) {
+  static query(where?: QueryObject): FirebaseFirestore.Query {
     const reducer = (acc: FirebaseFirestore.Query, value: QueryObjectValue, path: string) => {
       const isObject = typeof value === 'object'
       const entries = isObject ? Object.entries(value) : ['==', value]
@@ -102,7 +102,7 @@ export default class Model {
    * Save or Update an Entity
    */
   static async save<T extends Model>(entity: T): Promise<T> {
-    const collection = this.collection
+    const { collection } = this
     const doc = collection.doc(entity.id ?? collection.doc().id)
     const newEntity = this.create<T>({ ...entity, id: doc.id })
 

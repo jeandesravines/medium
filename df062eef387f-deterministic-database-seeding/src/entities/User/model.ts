@@ -7,10 +7,15 @@ export default class User extends Model {
   protected static collectionName = 'users'
 
   username: string
+
   email: string
+
   password: string
+
   name: string
+
   description?: string
+
   job?: string
 
   constructor(data: User) {

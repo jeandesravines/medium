@@ -2,7 +2,6 @@ import Model from '../Model/model'
 import User from '../User/model'
 import { PostType } from './constants'
 
-
 export default class Post extends Model {
   /**
    * The Firestore Collection name
@@ -10,9 +9,13 @@ export default class Post extends Model {
   protected static collectionName = 'posts'
 
   author: User['id']
+
   title: string
+
   body: string
+
   type: PostType
+
   publishedAt: number
 
   constructor(data: Post) {

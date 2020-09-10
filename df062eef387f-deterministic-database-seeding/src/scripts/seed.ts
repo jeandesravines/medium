@@ -25,7 +25,7 @@ async function seed(): Promise<void> {
   await _.reduce(seeders, reducer, Promise.resolve())
 }
 
-/////
-/////
+//
+//
 
 seed()

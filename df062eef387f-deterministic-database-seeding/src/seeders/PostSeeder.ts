@@ -17,7 +17,7 @@ export default class PostSeeder extends Seeder {
    */
   async run(): Promise<void> {
     const users: User[] = await User.findManyBy()
-    const types: String[] = Object.values(PostType)
+    const types: string[] = Object.values(PostType)
 
     const documents = users.flatMap((user: User) => {
       return types.map((type, i) => {
