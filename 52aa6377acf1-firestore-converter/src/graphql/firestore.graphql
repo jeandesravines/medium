@@ -1,0 +1,29 @@
+enum PostType {
+  ARTICLE
+  STORY
+  TUTORIAL
+}
+
+type Model {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type User extends Model {
+  id: ID!
+  username: String!
+  email: String!
+  name: String!
+  description: String
+  job: String
+}
+
+type Post extends Model {
+  id: ID!
+  author: ID!
+  title: String!
+  body: String!
+  type: PostType!
+  publishedAt: DateTime
+}

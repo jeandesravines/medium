@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "module": "commonjs",
+    "outDir": "dist",
+    "lib": ["ESNext"],
+    "sourceMap": true,
+    "strict": true,
+    "target": "ES2020"
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules"]
+}
