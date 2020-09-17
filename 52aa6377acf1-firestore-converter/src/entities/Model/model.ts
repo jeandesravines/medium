@@ -33,20 +33,6 @@ export default class Model {
   protected static collectionName: string
 
   /**
-   * Create a Firestore Collection converter
-   */
-  private static get converter() {
-    return {
-      fromFirestore: <T extends Model>(snapshot: FirebaseFirestore.QueryDocumentSnapshot): T => {
-        return this.create<T>(this.fromFirestore(snapshot.data()) as T)
-      },
-      toFirestore: <T extends Model>(model: T): FirebaseFirestore.DocumentData => {
-        return this.toFirestore(model)
-      },
-    }
-  }
-
-  /**
    * Return the Firestore Collection for the Model
    */
   protected static get collection(): FirebaseFirestore.CollectionReference {
@@ -54,10 +40,24 @@ export default class Model {
   }
 
   /**
+   * Create a Firestore Collection converter
+   */
+  private static get converter() {
+    return {
+      fromFirestore: <T extends Model>(snapshot: FirebaseFirestore.QueryDocumentSnapshot): T => {
+        return this.create<T>(this.transformFromFirestore(snapshot.data()) as T)
+      },
+      toFirestore: <T extends Model>(model: T): FirebaseFirestore.DocumentData => {
+        return this.transformToFirestore(model)
+      },
+    }
+  }
+
+  /**
    * Convert data from Firestore to match the Model constructor
    */
-  private static transformFromFirestore(snapshot: FirebaseFirestore.QueryDocumentSnapshot): Record<string, any> {
-    return snapshot
+  private static transformFromFirestore(data: FirebaseFirestore.DocumentData): Record<string, any> {
+    return data
   }
 
   /**
@@ -65,7 +65,9 @@ export default class Model {
    */
   private static transformToFirestore<T extends Model>(model: T): Record<string, any> {
     // Remove id from the data
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { id, ...data } = model
+
     // Add timestamps
     const defaults = {
       createdAt: Date.now(),

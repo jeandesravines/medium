@@ -4,14 +4,13 @@ enum PostType {
   TUTORIAL
 }
 
-type Model {
+interface Model {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
 }
 
-type User extends Model {
-  id: ID!
+type User implements Model {
   username: String!
   email: String!
   name: String!
@@ -19,8 +18,7 @@ type User extends Model {
   job: String
 }
 
-type Post extends Model {
-  id: ID!
+type Post implements Model {
   author: ID!
   title: String!
   body: String!

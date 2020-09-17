@@ -11,6 +11,9 @@
     "plugin:@typescript-eslint/recommended",
     "prettier"
   ],
+  "env": {
+    "jest": true
+  },
   "settings": {
     "import/resolver": {
       "node": {
