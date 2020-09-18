@@ -2,7 +2,7 @@ import _ from 'lodash'
 import firebase from '../../services/firebase'
 import { QueryObject, QueryObjectValue } from './types'
 
-export default class Model {
+export default abstract class Model {
   /**
    * ID
    */
@@ -40,7 +40,7 @@ export default class Model {
   }
 
   /**
-   * Create a Firestore Collection converter
+   * Create a FirestoreDataConverter
    */
   private static get converter() {
     return {
@@ -54,34 +54,33 @@ export default class Model {
   }
 
   /**
-   * Convert data from Firestore to match the Model constructor
+   * Convert data from Firestore to match the Model constructor.
+   * This method can be overriden by a sub-class.
+   * The sub-class' method has to call super.transformFromFirestore.
    */
-  private static transformFromFirestore(data: FirebaseFirestore.DocumentData): Record<string, any> {
+  protected static transformFromFirestore(data: FirebaseFirestore.DocumentData): Record<string, any> {
     return data
   }
 
   /**
-   * Convert Model before be saved to Firestore
+   * Convert Model before be saved to Firestore.
+   * This method can be overriden by a sub-class.
    */
-  private static transformToFirestore<T extends Model>(model: T): Record<string, any> {
-    // Remove id from the data
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { id, ...data } = model
-
+  protected static transformToFirestore<T extends Model>(model: T): Record<string, any> {
     // Add timestamps
     const defaults = {
       createdAt: Date.now(),
       updatedAt: Date.now(),
     }
 
-    return { ...defaults, ...data }
+    return _.omit({ ...defaults, ...model }, ['id'])
   }
 
   /**
    * Create a new Model instance with the data as parameter
    */
   static create<T extends Model>(data: T): T {
-    return new this(data) as T
+    return Reflect.construct(this, data) as T
   }
 
   /**

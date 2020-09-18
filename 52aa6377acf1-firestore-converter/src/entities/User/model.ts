@@ -29,7 +29,7 @@ export default class User extends Model {
     this.job = data.job
   }
 
-  protected static transformFromFirestore(data: Record<string, any>): User {
+  protected static transformFromFirestore(data: User): User {
     return super.transformFromFirestore({
       username: String(data.username),
       email: String(data.email),
