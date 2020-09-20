@@ -1,8 +1,9 @@
+import { firestore } from 'firebase-admin'
 import _ from 'lodash'
 import firebase from '../../services/firebase'
 import { QueryObject, QueryObjectValue } from './types'
 
-export default abstract class Model {
+export default class Model {
   /**
    * ID
    */
@@ -45,18 +46,43 @@ export default abstract class Model {
   private static get converter() {
     return {
       fromFirestore: <T extends Model>(snapshot: FirebaseFirestore.QueryDocumentSnapshot): T => {
-        return this.create<T>(this.transformFromFirestore(snapshot.data()) as T)
+        return this.create<T>(this.fromFirestore(snapshot) as T)
       },
       toFirestore: <T extends Model>(model: T): FirebaseFirestore.DocumentData => {
-        return this.transformToFirestore(model)
+        return this.toFirestore(model)
       },
     }
   }
 
   /**
    * Convert data from Firestore to match the Model constructor.
-   * This method can be overriden by a sub-class.
-   * The sub-class' method has to call super.transformFromFirestore.
+   */
+  private static fromFirestore<T extends Model>(snapshot: FirebaseFirestore.DocumentSnapshot): T {
+    const transformed = this.transformFromFirestore(snapshot.data() as FirebaseFirestore.DocumentSnapshot)
+    const addons = {
+      id: snapshot.id,
+      createdAt: snapshot.createTime?.toMillis(),
+      updatedAt: snapshot.updateTime?.toMillis(),
+    }
+
+    return {
+      ...transformed,
+      ...addons,
+    } as T
+  }
+
+  /**
+   * Convert Model before be saved to Firestore.
+   */
+  private static toFirestore<T extends Model>(model: T): Record<string, any> {
+    const transformed = this.transformToFirestore(model)
+    const filtered = _.omit(transformed, ['id', 'createdAt', 'updatedAt'])
+
+    return { ...filtered }
+  }
+
+  /**
+   * Convert data from Firestore to match the Model constructor.
    */
   protected static transformFromFirestore(data: FirebaseFirestore.DocumentData): Record<string, any> {
     return data
@@ -67,26 +93,26 @@ export default abstract class Model {
    * This method can be overriden by a sub-class.
    */
   protected static transformToFirestore<T extends Model>(model: T): Record<string, any> {
-    // Add timestamps
-    const defaults = {
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-    }
-
-    return _.omit({ ...defaults, ...model }, ['id'])
+    return model
   }
 
   /**
    * Create a new Model instance with the data as parameter
    */
   static create<T extends Model>(data: T): T {
-    return Reflect.construct(this, data) as T
+    return Reflect.construct(this, [data]) as T
   }
 
   /**
    * Create a Firestore Query
    */
-  static query(where?: QueryObject): FirebaseFirestore.Query {
+  static query(where?: QueryObject): FirebaseFirestore.Query | FirebaseFirestore.DocumentReference {
+    // If the ID is queried,
+    // then we by pass the process to target the document by key
+    if (where?.id) {
+      return this.collection.doc(where.id)
+    }
+
     const reducer = (acc: FirebaseFirestore.Query, value: QueryObjectValue, path: string) => {
       const isObject = typeof value === 'object'
       const entries = isObject ? Object.entries(value) : ['==', value]
@@ -102,11 +128,13 @@ export default abstract class Model {
    * and returns its result for each Documents
    */
   private static async mapBy(where: QueryObject, callback: (doc: FirebaseFirestore.QueryDocumentSnapshot) => any) {
-    return this.query(where)
-      .get()
-      .then((querySnapshot) => {
-        return Promise.all(querySnapshot.docs.map(callback))
-      })
+    const snapshot = await this.query(where).get()
+
+    if (snapshot instanceof firestore.DocumentSnapshot) {
+      return [callback(snapshot as FirebaseFirestore.QueryDocumentSnapshot)]
+    }
+
+    return Promise.all(snapshot.docs.map(callback))
   }
 
   /**
@@ -116,6 +144,13 @@ export default abstract class Model {
     await this.mapBy(where as QueryObject, (doc) => {
       return doc.ref.delete()
     })
+  }
+
+  /**
+   * Get only one Entity from all the targeted by the Query
+   */
+  static async findOneBy<T extends Model>(where?: QueryObject): Promise<T> {
+    return this.findManyBy<T>(where).then(([doc]) => doc)
   }
 
   /**
@@ -137,7 +172,7 @@ export default abstract class Model {
 
     await doc.set(newEntity)
 
-    return newEntity
+    return this.findOneBy({ id: doc.id })
   }
 
   /**

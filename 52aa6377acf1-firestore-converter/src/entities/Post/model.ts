@@ -16,7 +16,7 @@ export default class Post extends Model {
 
   type: PostType
 
-  publishedAt?: number
+  publishedAt?: number | null
 
   constructor(data: Post) {
     super(data)
@@ -28,13 +28,13 @@ export default class Post extends Model {
     this.publishedAt = data.publishedAt
   }
 
-  protected static transformFromFirestore(data: Post): Post {
-    return super.transformFromFirestore({
+  protected static transformFromFirestore(data: FirebaseFirestore.DocumentData): Post {
+    return {
       author: String(data.author),
       title: String(data.title),
       body: String(data.body),
-      type: String(data.type),
-      publishedAt: (data.publishedAt && Number(data.publishedAt)) || null,
-    }) as Post
+      type: String(data.type) as PostType,
+      publishedAt: Number(data.publishedAt) || null,
+    }
   }
 }

@@ -14,9 +14,9 @@ export default class User extends Model {
 
   name: string
 
-  description?: string
+  description?: string | null
 
-  job?: string
+  job?: string | null
 
   constructor(data: User) {
     super(data)
@@ -29,14 +29,14 @@ export default class User extends Model {
     this.job = data.job
   }
 
-  protected static transformFromFirestore(data: User): User {
-    return super.transformFromFirestore({
+  protected static transformFromFirestore(data: FirebaseFirestore.DocumentData): User {
+    return {
       username: String(data.username),
       email: String(data.email),
       password: String(data.password),
       name: String(data.name),
       description: data.description ? String(data.description) : null,
       job: data.job ? String(data.job) : null,
-    })
+    }
   }
 }
