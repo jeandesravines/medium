@@ -4,7 +4,7 @@ env:
   WORKING_DIRECTORY: 52aa6377acf1-firestore-converter
 
 jobs:
-  test:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -13,7 +13,6 @@ jobs:
         run: |
           yarn install
           yarn lint
-          yarn test
 
   build:
     runs-on: ubuntu-latest
