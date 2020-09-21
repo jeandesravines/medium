@@ -1,0 +1,27 @@
+enum PostType {
+  ARTICLE
+  STORY
+  TUTORIAL
+}
+
+interface Model {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type User implements Model {
+  username: String!
+  email: String!
+  name: String!
+  description: String
+  job: String
+}
+
+type Post implements Model {
+  author: ID!
+  title: String!
+  body: String!
+  type: PostType!
+  publishedAt: DateTime
+}
