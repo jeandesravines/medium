@@ -34,7 +34,7 @@ export default class Model {
   protected static collectionName: string
 
   /**
-   * Return the Firestore Collection for the Model
+   * Create a FirestoreCollectionReference for the current Model
    */
   protected static get collection(): FirebaseFirestore.CollectionReference {
     return firebase.firestore().collection(this.collectionName).withConverter(this.converter)
@@ -55,7 +55,7 @@ export default class Model {
   }
 
   /**
-   * Convert data from Firestore to match the Model constructor.
+   * Convert the data from Firestore to match the Model constructor.
    */
   private static fromFirestore<T extends Model>(snapshot: FirebaseFirestore.DocumentSnapshot): T {
     const transformed = this.transformFromFirestore(snapshot.data() as FirebaseFirestore.DocumentSnapshot)
@@ -72,7 +72,7 @@ export default class Model {
   }
 
   /**
-   * Convert Model before be saved to Firestore.
+   * Convert the Model before be saved to Firestore.
    */
   private static toFirestore<T extends Model>(model: T): Record<string, any> {
     const transformed = this.transformToFirestore(model)
@@ -82,14 +82,14 @@ export default class Model {
   }
 
   /**
-   * Convert data from Firestore to match the Model constructor.
+   * Convert the data from Firestore to match the Model constructor.
    */
   protected static transformFromFirestore(data: FirebaseFirestore.DocumentData): Record<string, any> {
     return data
   }
 
   /**
-   * Convert Model before be saved to Firestore.
+   * Convert the Model before be saved to Firestore.
    * This method can be overriden by a sub-class.
    */
   protected static transformToFirestore<T extends Model>(model: T): Record<string, any> {
